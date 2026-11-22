@@ -36,7 +36,7 @@ local function downloadFonts()
 	    print("2", path)
 		riseGithubRequest(path)
 	end
-	local res1 = "https://api.github.com/repos/WhichChapter/VWRise/contents/fonts"
+	local res1 = "https://raw.githubusercontent.com/WhichChapter/VWRise/main/fonts/"
 	local res = game:HttpGet(res1, true)
 	local fonts = {}
 	if res ~= '404: Not Found' then 
