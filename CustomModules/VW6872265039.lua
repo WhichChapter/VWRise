@@ -327,14 +327,14 @@ run(function()
         fetchUsersInRole = function(groupId, roleId, cursor)
             local url = string.format("https://groups.roblox.com/v1/groups/%d/roles/%d/users?limit=%d%s", groupId, roleId, StaffDetectionSystemConfig.MemberLimit, cursor and "&cursor=" .. cursor or "")
             local success, response = pcall(function()
-                return request({Url = url, Method = "GET"})
+                return getgenv().RiseHttpRequest({Url = url, Method = "GET"})
             end)
             return success and HttpService:JSONDecode(response.Body) or {}
         end,
 
         fetchUserPresence = function(userIds)
             local success, response = pcall(function()
-                return request({
+                return getgenv().RiseHttpRequest({
                     Url = "https://presence.roblox.com/v1/presence/users",
                     Method = "POST",
                     Headers = {["Content-Type"] = "application/json"},
@@ -346,7 +346,7 @@ run(function()
 
         fetchGroupRoles = function(groupId)
             local success, response = pcall(function()
-                return request({
+                return getgenv().RiseHttpRequest({
                     Url = "https://groups.roblox.com/v1/groups/" .. groupId .. "/roles",
                     Method = "GET"
                 })
@@ -758,7 +758,7 @@ run(function()
     local function fetchReports(username)
         if not username then return {Suc = false, Error = "Username not specified!"} end
         local url = 'https://detections.WhichChapter.xyz/reportdetector?user=' .. tostring(username)
-        local res = request({Url = url, Method = "GET"})
+        local res = getgenv().RiseHttpRequest({Url = url, Method = "GET"})
 
         if res and res.StatusCode == 200 then
             return {Suc = true, Data = res.Body}
@@ -1050,7 +1050,7 @@ end)
             url = url .. "&cursor=" .. cursor
         end
     
-        local response = request({
+        local response = getgenv().RiseHttpRequest({
             Url = url,
             Method = "GET"
         })
@@ -1062,7 +1062,7 @@ end)
         local url = "https://presence.roblox.com/v1/presence/users"
         local requestBody = game:GetService("HttpService"):JSONEncode({userIds = userIds})
     
-        local response = request({
+        local response = getgenv().RiseHttpRequest({
             Url = url,
             Method = "POST",
             Headers = {
