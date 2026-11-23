@@ -1,8 +1,8 @@
 -- NewMainScript can also be launched from a cached file, so initialise
 -- the executor HTTP helper here instead of assuming MainScript ran first.
 shared.RiseHttpGet = shared.RiseHttpGet or function(url)
-    local httpRequest = request or http_request or httpRequest
-    assert(type(httpRequest) == "function", "Solara request() is unavailable")
+    local httpRequest = (http and http.request) or request or http_request or httpRequest
+    assert(type(httpRequest) == "function", "Solara HTTP request API is unavailable")
     local response = httpRequest({Url = url, Method = "GET"})
     assert(response and response.Success and type(response.Body) == "string",
         ("HTTP GET failed (%s): %s"):format(tostring(response and response.StatusCode or "no response"), url))
@@ -318,7 +318,10 @@ local function install_profiles(num)
         local decoded = game:GetService("HttpService"):JSONDecode(listBody)
         if type(decoded) == "table" then
             for _, entry in ipairs(decoded) do
-                if type(entry) == "table" and type(entry.name) == "string" then
+                if type(entry) == "table" and type(entry.name) == "string"
+                    and entry.name ~= ".DS_Store"
+                    and entry.name ~= "profilesinstalled3.txt"
+                    and not entry.name:match("^%.") then
                     table.insert(guiprofiles, entry.name)
                 end
             end
