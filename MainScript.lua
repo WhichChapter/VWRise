@@ -19,26 +19,49 @@ shared.VapeExecuted = true
 
 for i,v in pairs({"rise", "rise/CustomModules", "rise/Profiles", "rise/Assets", "rise/Libraries", "rise/fonts", "vape"}) do if not isfolder(v) then makefolder(v) end end
 
--- Prefer Solara's documented http.request API. Some compatibility aliases
--- route through Roblox HttpGet, which is restricted in this executor thread.
-getgenv().RiseHttpGet = function(url)
-	-- Solara's documented primary HTTP API is the global request() function.
-	-- http.request is only an alias and can be absent in some compatibility environments.
-	local httpRequest = request
-	if type(httpRequest) ~= "function" and type(http) == "table" then
-		httpRequest = http.request
-	end
-	assert(type(httpRequest) == "function",
-		"Solara request() is unavailable; update/restart Solara and reattach")
-
-	local ok, response = pcall(httpRequest, {Url = url, Method = "GET"})
-	if not ok then
-		error(("Solara HTTP request failed: %s"):format(tostring(response)), 2)
-	end
-	assert(type(response) == "table" and response.Success == true and type(response.Body) == "string",
-		("HTTP GET failed (%s): %s"):format(tostring(response and response.StatusCode or "no response"), url))
-	return response.Body
+-- Use the executor's request API for every HTTP operation. Do not fall back to Roblox HttpGet.
+local function getExecutorHttpRequest()
+    local executorEnv
+    if type(getgenv) == "function" then
+        pcall(function() executorEnv = getgenv() end)
+    end
+    if type(executorEnv) == "table" and type(executorEnv.request) == "function" then
+        return executorEnv.request
+    end
+    if type(http) == "table" and type(http.request) == "function" then
+        return http.request
+    end
+    if type(request) == "function" then
+        return request
+    end
+    return nil
 end
+
+getgenv().RiseHttpRequest = getgenv().RiseHttpRequest or function(options)
+    assert(type(options) == "table" and type(options.Url) == "string",
+        "RiseHttpRequest expects an options table with a Url")
+    local httpRequest = getExecutorHttpRequest()
+    assert(type(httpRequest) == "function",
+        "Executor request() is unavailable; restart Solara and reattach")
+    local ok, response = pcall(function()
+        return httpRequest(options)
+    end)
+    if not ok then
+        error(("Executor HTTP request failed: %s"):format(tostring(response)), 2)
+    end
+    assert(type(response) == "table",
+        ("Executor HTTP request returned no response for %s"):format(options.Url))
+    return response
+end
+
+getgenv().RiseHttpGet = getgenv().RiseHttpGet or function(url)
+    local response = getgenv().RiseHttpRequest({Url = url, Method = "GET"})
+    local statusCode = tonumber(response.StatusCode or response.Status)
+    assert((response.Success == true or statusCode == 200) and type(response.Body) == "string",
+        ("HTTP GET failed (%s): %s"):format(tostring(statusCode or "no response"), url))
+    return response.Body
+end
+
 
 local suc, err = pcall(function()
 	return getrenv().require(game:GetService("CoreGui").RobloxGui.Modules.ErrorPrompt)
