@@ -25,7 +25,7 @@ function VData.GetUserSha(plr)
 end
 
 VData.GetVoidwareAPI = function()
-    return game:HttpGet(Api_Url, true)
+    return getgenv().RiseHttpGet(Api_Url, true)
 end
 
 VData.olddata = isfile('vape/Libraries/vdata.json') and readfile('vape/Libraries/vdata.json') or nil
