@@ -1,5 +1,4 @@
--- NewMainScript can also be launched from a cached file, so initialise
--- the executor HTTP helper here instead of assuming MainScript ran first.
+-- Use the executor's request API for every HTTP operation. Do not fall back to Roblox HttpGet.
 local function getExecutorHttpRequest()
     local executorEnv
     if type(getgenv) == "function" then
@@ -17,22 +16,27 @@ local function getExecutorHttpRequest()
     return nil
 end
 
-getgenv().RiseHttpGet = function(url)
+getgenv().RiseHttpRequest = getgenv().RiseHttpRequest or function(options)
+    assert(type(options) == "table" and type(options.Url) == "string",
+        "RiseHttpRequest expects an options table with a Url")
     local httpRequest = getExecutorHttpRequest()
     assert(type(httpRequest) == "function",
-        "Solara executor request() is unavailable; restart Solara and reattach")
-
+        "Executor request() is unavailable; restart Solara and reattach")
     local ok, response = pcall(function()
-        return httpRequest({Url = url, Method = "GET"})
+        return httpRequest(options)
     end)
     if not ok then
         error(("Executor HTTP request failed: %s"):format(tostring(response)), 2)
     end
+    assert(type(response) == "table",
+        ("Executor HTTP request returned no response for %s"):format(options.Url))
+    return response
+end
 
-    local statusCode = type(response) == "table" and tonumber(response.StatusCode or response.Status)
-    local successful = type(response) == "table"
-        and (response.Success == true or statusCode == 200)
-    assert(successful and type(response.Body) == "string",
+getgenv().RiseHttpGet = getgenv().RiseHttpGet or function(url)
+    local response = getgenv().RiseHttpRequest({Url = url, Method = "GET"})
+    local statusCode = tonumber(response.StatusCode or response.Status)
+    assert((response.Success == true or statusCode == 200) and type(response.Body) == "string",
         ("HTTP GET failed (%s): %s"):format(tostring(statusCode or "no response"), url))
     return response.Body
 end
@@ -218,7 +222,7 @@ function VWFunctions.CreateID()
         local data = {["client_id"] = tostring(HWID), ["user_id"] = tonumber(game:GetService("Players").LocalPlayer.UserId)}
         local final_data = game:GetService("HttpService"):JSONEncode(data)
         local url = "https://api.WhichChapter.xyz/create_id"
-        local a = request({
+        local a = getgenv().RiseHttpRequest({
             Url = url,
             Method = 'POST',
             Headers = headers,
@@ -250,7 +254,7 @@ function VWFunctions.CreateID()
                 ["roblox_username"] = tostring(game.Players.LocalPlayer.Name)
             }
         
-            local res = request({
+            local res = getgenv().RiseHttpRequest({
                 Url = 'https://whitelist.WhichChapter.xyz/edit_wl',
                 Method = 'POST',
                 Headers = headers,
@@ -276,7 +280,7 @@ function VWFunctions.CreateID()
                 ["connection_key"] = tostring(key),
             }
         
-            local res = request({
+            local res = getgenv().RiseHttpRequest({
                 Url = 'https://storage.WhichChapter.xyz/storage/redeem-key',
                 Method = 'POST',
                 Headers = headers,
@@ -342,7 +346,7 @@ function VWFunctions.LogStats()
         }
         local final_data = game:GetService("HttpService"):JSONEncode(data)
         local url = "https://voidware-stats.WhichChapter.xyz/stats/data/add"
-        local a = request({
+        local a = getgenv().RiseHttpRequest({
             Url = url,
             Method = 'POST',
             Headers = headers,
