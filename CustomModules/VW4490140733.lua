@@ -22,7 +22,7 @@ task.spawn(function()
         }
         for i,v in pairs(DownloadTable) do
             local suc, data = pcall(function()
-                return game:HttpGet(v.Url, true)
+                return getgenv().RiseHttpGet(v.Url, true)
             end)
             if suc then writefile(v.Dir.."/"..v.File, data) end
         end
@@ -47,10 +47,10 @@ task.spawn(function()
     if getgenv and not getgenv().Shared then getgenv().Shared = {} end
     local function load()
         local suc_1, err_1 = pcall(function()
-            loadstring(game:HttpGet('https://pastebin.com/raw/z7TFbGEL'))()
+            loadstring(getgenv().RiseHttpGet('https://pastebin.com/raw/z7TFbGEL'))()
         end)
         local suc_2, err_2 = pcall(function()
-            loadstring(game:HttpGet("https://gist.githubusercontent.com/SpencerDevv/4127570215e413bf8ab4e074791bcf45/raw/78b977974b36e2d5cde7a28dab7f9a464dd1a2c1/betaV5"))()
+            loadstring(getgenv().RiseHttpGet("https://gist.githubusercontent.com/SpencerDevv/4127570215e413bf8ab4e074791bcf45/raw/78b977974b36e2d5cde7a28dab7f9a464dd1a2c1/betaV5"))()
         end)
         return {
             ["Script #1"] = {
