@@ -17,7 +17,7 @@ local function getExecutorHttpRequest()
     return nil
 end
 
-shared.RiseHttpGet = function(url)
+getgenv().RiseHttpGet = function(url)
     local httpRequest = getExecutorHttpRequest()
     assert(type(httpRequest) == "function",
         "Solara executor request() is unavailable; restart Solara and reattach")
@@ -397,7 +397,7 @@ local function install_profiles(num)
     end
 
     -- Fetch the profile listing before marking anything as installed.
-    local listBody = shared.RiseHttpGet(listUrl)
+    local listBody = getgenv().RiseHttpGet(listUrl)
     if listBody ~= "404: Not Found" then
         local decoded = game:GetService("HttpService"):JSONDecode(listBody)
         if type(decoded) == "table" then
@@ -420,7 +420,7 @@ local function install_profiles(num)
         if not isfile(fullPath) then
             print("Downloading "..relativePath)
             local ok, body = pcall(function()
-                return shared.RiseHttpGet("https://raw.githubusercontent.com/"..profileRepo.."/main/"..relativePath)
+                return getgenv().RiseHttpGet("https://raw.githubusercontent.com/"..profileRepo.."/main/"..relativePath)
             end)
             if not ok then
                 warn("Profile download failed for "..relativePath..": "..tostring(body))
@@ -455,7 +455,7 @@ if not are_installed_2() then install_profiles(2) end
 local url = RiseMode and "https://github.com/WhichChapter/VWRise/" or "https://github.com/WhichChapter/VoidwareBakup"
 if not shared.VapeDeveloper then 
 	local commit = "main"
-	for i,v in pairs(shared.RiseHttpGet(url):split("\n")) do 
+	for i,v in pairs(getgenv().RiseHttpGet(url):split("\n")) do 
 		if v:find("commit") and v:find("fragment") then 
 			local str = v:split("/")[5]
 			commit = str:sub(0, str:find('"') - 1)
@@ -503,7 +503,7 @@ if not shared.VapeDeveloper then
 end
 if not shared.VapeDeveloper then 
 	local commit = "main"
-	for i,v in pairs(shared.RiseHttpGet("https://github.com/WhichChapter/vapevoidware"):split("\n")) do 
+	for i,v in pairs(getgenv().RiseHttpGet("https://github.com/WhichChapter/vapevoidware"):split("\n")) do 
 		if v:find("commit") and v:find("fragment") then 
 			local str = v:split("/")[5]
 			commit = str:sub(0, str:find('"') - 1)
@@ -698,7 +698,7 @@ local function vapeGithubRequest(scripturl, isImportant)
     end
     local suc, res
     local url = RiseMode and "https://raw.githubusercontent.com/WhichChapter/VWRise/" or "https://raw.githubusercontent.com/WhichChapter/VoidwareBakup/"
-    suc, res = pcall(function() return shared.RiseHttpGet(url..commit.."/"..scripturl, true) end)
+    suc, res = pcall(function() return getgenv().RiseHttpGet(url..commit.."/"..scripturl, true) end)
     if not suc or res == "404: Not Found" then
         if isImportant then
             game:GetService('StarterGui'):SetCore('SendNotification', {
