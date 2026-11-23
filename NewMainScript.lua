@@ -1,21 +1,39 @@
 -- NewMainScript can also be launched from a cached file, so initialise
 -- the executor HTTP helper here instead of assuming MainScript ran first.
-shared.RiseHttpGet = function(url)
-    -- Solara's documented primary HTTP API is the global request() function.
-    -- http.request is only an alias and can be absent in some compatibility environments.
-    local httpRequest = request
-    if type(httpRequest) ~= "function" and type(http) == "table" then
-        httpRequest = http.request
+local function getExecutorHttpRequest()
+    local executorEnv
+    if type(getgenv) == "function" then
+        pcall(function() executorEnv = getgenv() end)
     end
-    assert(type(httpRequest) == "function",
-        "Solara request() is unavailable; update/restart Solara and reattach")
+    if type(executorEnv) == "table" and type(executorEnv.request) == "function" then
+        return executorEnv.request
+    end
+    if type(http) == "table" and type(http.request) == "function" then
+        return http.request
+    end
+    if type(request) == "function" then
+        return request
+    end
+    return nil
+end
 
-    local ok, response = pcall(httpRequest, {Url = url, Method = "GET"})
+shared.RiseHttpGet = function(url)
+    local httpRequest = getExecutorHttpRequest()
+    assert(type(httpRequest) == "function",
+        "Solara executor request() is unavailable; restart Solara and reattach")
+
+    local ok, response = pcall(function()
+        return httpRequest({Url = url, Method = "GET"})
+    end)
     if not ok then
-        error(("Solara HTTP request failed: %s"):format(tostring(response)), 2)
+        error(("Executor HTTP request failed: %s"):format(tostring(response)), 2)
     end
-    assert(type(response) == "table" and response.Success == true and type(response.Body) == "string",
-        ("HTTP GET failed (%s): %s"):format(tostring(response and response.StatusCode or "no response"), url))
+
+    local statusCode = type(response) == "table" and tonumber(response.StatusCode or response.Status)
+    local successful = type(response) == "table"
+        and (response.Success == true or statusCode == 200)
+    assert(successful and type(response.Body) == "string",
+        ("HTTP GET failed (%s): %s"):format(tostring(statusCode or "no response"), url))
     return response.Body
 end
 
@@ -133,6 +151,62 @@ local isfile = isfile or function(file)
 end
 local delfile = delfile or function(file) writefile(file, "") end
 if not isfolder(baseDirectory) then makefolder(baseDirectory) end
+-- Copy the user's existing executor-workspace fonts before pload() evaluates
+-- MainScript.lua in its nested loadstring environment. No font downloads or
+-- installation are performed; source files remain in vape/fonts/.
+local function copyWorkspaceFonts()
+    local sourceRoot = "vape/fonts/"
+    local targetRoot = "rise/fonts/"
+    local fontFiles = {
+        "Icon-1.ttf",
+        "Icon-2.ttf",
+        "Icon-3.ttf",
+        "Minecraft.ttf",
+        "product_sans_bold.ttf",
+        "product_sans_bold_italic.ttf",
+        "product_sans_italic.ttf",
+        "product_sans_light.ttf",
+        "product_sans_medium.ttf",
+        "product_sans_regular.ttf",
+        "productsans.json"
+    }
+
+    local executorEnv
+    if type(getgenv) == "function" then
+        pcall(function() executorEnv = getgenv() end)
+    end
+    local workspaceReadFile = type(executorEnv) == "table" and executorEnv.readfile or readfile
+    local workspaceWriteFile = type(executorEnv) == "table" and executorEnv.writefile or writefile
+    assert(type(workspaceReadFile) == "function", "Executor readfile() is unavailable")
+    assert(type(workspaceWriteFile) == "function", "Executor writefile() is unavailable")
+
+    if not isfolder(targetRoot) then
+        makefolder(targetRoot)
+    end
+
+    local copied = 0
+    for _, fontName in ipairs(fontFiles) do
+        local sourcePath = sourceRoot .. fontName
+        local ok, contents = pcall(function()
+            return workspaceReadFile(sourcePath)
+        end)
+        if ok and type(contents) == "string" and #contents > 0 then
+            local writeOk, writeError = pcall(function()
+                workspaceWriteFile(targetRoot .. fontName, contents)
+            end)
+            if writeOk then
+                copied += 1
+            else
+                warn("[VWRise fonts] Could not copy " .. fontName .. ": " .. tostring(writeError))
+            end
+        else
+            warn("[VWRise fonts] Could not read " .. sourcePath .. ": " .. tostring(contents))
+        end
+    end
+    print(string.format("[VWRise fonts] Copied %d/%d existing workspace files", copied, #fontFiles))
+end
+copyWorkspaceFonts()
+
 local VWFunctions = {}
 function VWFunctions.CreateID()
     pcall(function()
