@@ -21,7 +21,7 @@ for i,v in pairs({"rise", "rise/CustomModules", "rise/Profiles", "rise/Assets", 
 
 -- Prefer Solara's documented http.request API. Some compatibility aliases
 -- route through Roblox HttpGet, which is restricted in this executor thread.
-shared.RiseHttpGet = function(url)
+getgenv().RiseHttpGet = function(url)
 	-- Solara's documented primary HTTP API is the global request() function.
 	-- http.request is only an alias and can be absent in some compatibility environments.
 	local httpRequest = request
@@ -334,11 +334,11 @@ local function loadRise()
 						loadstring(readfile("rise/NewMainScript.lua"))()
 					else
 						shared.RiseMode = true
-						loadstring(shared.RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/VWRise/main/NewMainScript.lua"))()
+						loadstring(getgenv().RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/VWRise/main/NewMainScript.lua"))()
 					end
 				else
 					shared.RiseMode = true
-					loadstring(shared.RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/VWRise/main/NewMainScript.lua"))()
+					loadstring(getgenv().RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/VWRise/main/NewMainScript.lua"))()
 				end
 			end
 		]]
