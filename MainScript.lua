@@ -19,11 +19,21 @@ shared.VapeExecuted = true
 
 for i,v in pairs({"rise", "rise/CustomModules", "rise/Profiles", "rise/Assets", "rise/Libraries", "rise/fonts"}) do if not isfolder(v) then makefolder(v) end end
 
+-- Use Solara's executor HTTP API rather than Roblox's restricted HTTP path.
+shared.RiseHttpGet = function(url)
+	local httpRequest = request or http_request or httpRequest
+	assert(type(httpRequest) == "function", "Solara request() is unavailable")
+	local response = httpRequest({Url = url, Method = "GET"})
+	assert(response and response.Success and type(response.Body) == "string",
+		("HTTP GET failed (%s): %s"):format(tostring(response and response.StatusCode or "no response"), url))
+	return response.Body
+end
+
 local function riseGithubRequest(scripturl)
-    print("1", scripturl)
-	local suc, res = pcall(function() return game:HttpGet('https://raw.githubusercontent.com/WhichChapter/VWRise/main/'..scripturl, true) end)
-	writefile("rise/"..scripturl, res)
-	return readfile("rise/"..scripturl)
+	print("1", scripturl)
+	local res = shared.RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/VWRise/main/" .. scripturl)
+	writefile("rise/" .. scripturl, res)
+	return res
 end
 
 local suc, err = pcall(function()
@@ -36,8 +46,8 @@ local function downloadFonts()
 	    print("2", path)
 		riseGithubRequest(path)
 	end
-	local res1 = "https://raw.githubusercontent.com/WhichChapter/VWRise/main/fonts/"
-	local res = game:HttpGet(res1, true)
+	local res1 = "https://api.github.com/repos/WhichChapter/VWRise/contents/fonts?ref=main"
+	local res = shared.RiseHttpGet(res1)
 	local fonts = {}
 	if res ~= '404: Not Found' then 
 		for i,v in next, game:GetService("HttpService"):JSONDecode(res) do 
@@ -342,11 +352,11 @@ local function loadRise()
 						loadstring(readfile("rise/NewMainScript.lua"))()
 					else
 						shared.RiseMode = true
-						loadstring(game:HttpGet("https://raw.githubusercontent.com/WhichChapter/VWRise/main/NewMainScript.lua", true))()
+						loadstring(shared.RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/VWRise/main/NewMainScript.lua"))()
 					end
 				else
 					shared.RiseMode = true
-					loadstring(game:HttpGet("https://raw.githubusercontent.com/WhichChapter/VWRise/main/NewMainScript.lua", true))()
+					loadstring(shared.RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/VWRise/main/NewMainScript.lua"))()
 				end
 			end
 		]]
