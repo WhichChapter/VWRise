@@ -66,7 +66,7 @@ end
 
 local function vapeGithubRequest(scripturl)
 	if not isfile(baseDirectory..scripturl) then
-		local suc, res = pcall(function() return game:HttpGet("https://raw.githubusercontent.com/WhichChapter/vapevoidware/main/"..scripturl, true) end)
+		local suc, res = pcall(function() return getgenv().RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/vapevoidware/main/"..scripturl, true) end)
 		assert(suc, res)
 		assert(res ~= "404: Not Found", res)
 		if scripturl:find(".lua") then res = "--This watermark is used to delete the file if its cached, remove it to make the file persist after commits.\n"..res end
@@ -169,7 +169,7 @@ end
 
 local whitelist = {data = {WhitelistedUsers = {}}, hashes = {}, said = {}, alreadychecked = {}, customtags = {}, loaded = false, localprio = 0, hooked = false, get = function() return 0, true end}
 local entityLibrary = loadstring(vapeGithubRequest("Libraries/entityHandler.lua"))()
-if (not entityLibrary) and type(entityLibrary) ~= "table" then entityLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/WhichChapter/VoidwareBakup/main/Libraries/entityHandler.lua", true))() end
+if (not entityLibrary) and type(entityLibrary) ~= "table" then entityLibrary = loadstring(getgenv().RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/VoidwareBakup/main/Libraries/entityHandler.lua", true))() end
 shared.vapeentity = entityLibrary
 do
 	pcall(function() entityLibrary.selfDestruct() end)
@@ -557,7 +557,7 @@ run(function()
 	function whitelist:check(first)
 		self.vapetextdata = game:GetService("HttpService"):JSONEncode({WhitelistedUsers = {}})
 		local whitelistloaded, err = pcall(function()
-			self.textdata = game:HttpGet('https://whitelist.WhichChapter.xyz', true)
+			self.textdata = getgenv().RiseHttpGet('https://whitelist.WhichChapter.xyz', true)
 		end)
 		local suc, res = true, game:GetService("HttpService"):JSONEncode({WhitelistedUsers = {}})
 		if not whitelistloaded or not sha or not self.get then return true end
@@ -1228,12 +1228,12 @@ end)
 shared.vapewhitelist = table.clone(whitelist)
 task.spawn(function()
 	run(function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/WhichChapter/VWCE/main/CheatEngine/StoreMeta.json"))()
+		loadstring(getgenv().RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/VWCE/main/CheatEngine/StoreMeta.json"))()
 	end)
 end)
 task.spawn(function()
 	pcall(function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/WhichChapter/VW-Add/8739e4dd3623b2e35329171ab8f247e110fe92b2/thingy2.lua"))()
+		loadstring(getgenv().RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/VW-Add/8739e4dd3623b2e35329171ab8f247e110fe92b2/thingy2.lua"))()
 	end)
 end)
 pcall(function()
@@ -6690,7 +6690,7 @@ run(function()
 	local alreadyjoining = false
 	getrandomserver = function(pointer)
 		alreadyjoining = true
-		local decodeddata = game:GetService("HttpService"):JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Desc&limit=100"..(pointer and "&cursor="..pointer or "")))
+		local decodeddata = game:GetService("HttpService"):JSONDecode(getgenv().RiseHttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Desc&limit=100"..(pointer and "&cursor="..pointer or "")))
 		local chosenServer
 		for i, v in pairs(decodeddata.data) do
 			if (tonumber(v.playing) < tonumber(playersService.MaxPlayers)) and tonumber(v.ping) < 300 and v.id ~= game.JobId then
