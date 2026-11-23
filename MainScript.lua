@@ -22,9 +22,9 @@ for i,v in pairs({"rise", "rise/CustomModules", "rise/Profiles", "rise/Assets", 
 -- Prefer Solara's documented http.request API. Some compatibility aliases
 -- route through Roblox HttpGet, which is restricted in this executor thread.
 shared.RiseHttpGet = function(url)
-	local httpRequest = (http and http.request) or request or http_request or httpRequest
-	assert(type(httpRequest) == "function", "Solara HTTP request API is unavailable")
-	local response = httpRequest({Url = url, Method = "GET"})
+	assert(type(http) == "table" and type(http.request) == "function",
+		"Solara http.request is unavailable; check your Solara version")
+	local response = http.request({Url = url, Method = "GET"})
 	assert(response and response.Success and type(response.Body) == "string",
 		("HTTP GET failed (%s): %s"):format(tostring(response and response.StatusCode or "no response"), url))
 	return response.Body
