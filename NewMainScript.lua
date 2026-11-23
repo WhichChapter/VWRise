@@ -1,3 +1,14 @@
+-- NewMainScript can also be launched from a cached file, so initialise
+-- the executor HTTP helper here instead of assuming MainScript ran first.
+shared.RiseHttpGet = shared.RiseHttpGet or function(url)
+    local httpRequest = request or http_request or httpRequest
+    assert(type(httpRequest) == "function", "Solara request() is unavailable")
+    local response = httpRequest({Url = url, Method = "GET"})
+    assert(response and response.Success and type(response.Body) == "string",
+        ("HTTP GET failed (%s): %s"):format(tostring(response and response.StatusCode or "no response"), url))
+    return response.Body
+end
+
 repeat task.wait() until game:IsLoaded()
 shared.oldgetcustomasset = shared.oldgetcustomasset or getcustomasset
 local smooth = not game:IsLoaded()
