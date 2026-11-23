@@ -23,7 +23,7 @@ local function GetURL(scripturl)
 	if shared.VapeDeveloper then
 		return readfile("vape/"..scripturl)
 	else
-		return game:HttpGet("https://raw.githubusercontent.com/WhichChapter/vapevoidware/main/"..scripturl, true)
+		return getgenv().RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/vapevoidware/main/"..scripturl, true)
 	end
 end
 local bettergetfocus = function()
@@ -44,10 +44,10 @@ local betterisfile = function(file)
 	local suc, res = pcall(function() return readfile(file) end)
 	return suc and res ~= nil
 end
-local requestfunc = syn and syn.request or http and http.request or http_request or fluxus and fluxus.request or request or function(tab)
+local requestfunc = getgenv().RiseHttpRequest or syn and syn.request or http and http.request or http_request or fluxus and fluxus.request or request or function(tab)
 	if tab.Method == "GET" then
 		return {
-			Body = game:HttpGet(tab.Url, true),
+			Body = getgenv().RiseHttpGet(tab.Url, true),
 			Headers = {},
 			StatusCode = 200
 		}
@@ -78,7 +78,7 @@ local function GetURL(scripturl)
 	if shared.VapeDeveloper then
 		return readfile("vape/"..scripturl)
 	else
-		return game:HttpGet("https://raw.githubusercontent.com/WhichChapter/vapevoidware/main/"..scripturl, true)
+		return getgenv().RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/vapevoidware/main/"..scripturl, true)
 	end
 end
 
@@ -1364,20 +1364,20 @@ task.spawn(function()
 		pcall(function()
 			if not isfile("vape/Profiles/bedwarsdata.txt") then
 				local commit = "main"
-				for i,v in pairs(game:HttpGet("https://github.com/WhichChapter/vapevoidware"):split("\n")) do
+				for i,v in pairs(getgenv().RiseHttpGet("https://github.com/WhichChapter/vapevoidware"):split("\n")) do
 					if v:find("commit") and v:find("fragment") then
 						local str = v:split("/")[5]
 						commit = str:sub(0, str:find('"') - 1)
 						break
 					end
 				end
-				writefile("vape/Profiles/bedwarsdata.txt", game:HttpGet("https://raw.githubusercontent.com/WhichChapter/vapevoidware/"..commit.."/CustomModules/bedwarsdata", true))
+				writefile("vape/Profiles/bedwarsdata.txt", getgenv().RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/vapevoidware/"..commit.."/CustomModules/bedwarsdata", true))
 			end
 			local olddata = readfile("vape/Profiles/bedwarsdata.txt")
 
 			repeat
 				local commit = "main"
-				for i,v in pairs(game:HttpGet("https://github.com/WhichChapter/vapevoidware"):split("\n")) do
+				for i,v in pairs(getgenv().RiseHttpGet("https://github.com/WhichChapter/vapevoidware"):split("\n")) do
 					if v:find("commit") and v:find("fragment") then
 						local str = v:split("/")[5]
 						commit = str:sub(0, str:find('"') - 1)
@@ -1385,7 +1385,7 @@ task.spawn(function()
 					end
 				end
 
-				local newdata = game:HttpGet("https://raw.githubusercontent.com/WhichChapter/vapevoidware/"..commit.."/CustomModules/bedwarsdata", true)
+				local newdata = getgenv().RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/vapevoidware/"..commit.."/CustomModules/bedwarsdata", true)
 				if newdata ~= olddata then
 					rundata(game:GetService("HttpService"):JSONDecode(newdata), game:GetService("HttpService"):JSONDecode(olddata))
 					olddata = newdata
