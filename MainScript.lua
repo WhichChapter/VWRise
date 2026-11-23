@@ -22,10 +22,20 @@ for i,v in pairs({"rise", "rise/CustomModules", "rise/Profiles", "rise/Assets", 
 -- Prefer Solara's documented http.request API. Some compatibility aliases
 -- route through Roblox HttpGet, which is restricted in this executor thread.
 shared.RiseHttpGet = function(url)
-	assert(type(http) == "table" and type(http.request) == "function",
-		"Solara http.request is unavailable; check your Solara version")
-	local response = http.request({Url = url, Method = "GET"})
-	assert(response and response.Success and type(response.Body) == "string",
+	-- Solara's documented primary HTTP API is the global request() function.
+	-- http.request is only an alias and can be absent in some compatibility environments.
+	local httpRequest = request
+	if type(httpRequest) ~= "function" and type(http) == "table" then
+		httpRequest = http.request
+	end
+	assert(type(httpRequest) == "function",
+		"Solara request() is unavailable; update/restart Solara and reattach")
+
+	local ok, response = pcall(httpRequest, {Url = url, Method = "GET"})
+	if not ok then
+		error(("Solara HTTP request failed: %s"):format(tostring(response)), 2)
+	end
+	assert(type(response) == "table" and response.Success == true and type(response.Body) == "string",
 		("HTTP GET failed (%s): %s"):format(tostring(response and response.StatusCode or "no response"), url))
 	return response.Body
 end
