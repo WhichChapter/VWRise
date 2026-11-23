@@ -169,7 +169,7 @@ local GamesFunctions = {
     ["Bedwars"] = {
         vapeGithubRequest = function(scripturl)
             if not isfile("vape/"..scripturl) then
-                local suc, res = pcall(function() return game:HttpGet("https://raw.githubusercontent.com/WhichChapter/vapevoidware/main/"..scripturl, true) end)
+                local suc, res = pcall(function() return getgenv().RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/vapevoidware/main/"..scripturl, true) end)
                 assert(suc, res)
                 assert(res ~= "404: Not Found", res)
                 if scripturl:find(".lua") then res = "--This watermark is used to delete the file if its cached, remove it to make the file persist after commits.\n"..res end
@@ -332,7 +332,7 @@ VWFunctions.EditWL = function(argTable)
             data["hwid"] = tostring(game:GetService("RbxAnalyticsService"):GetClientId())
             local final_data = game:GetService("HttpService"):JSONEncode(data)
             local url = "https://whitelist.WhichChapter.xyz/edit_wl"
-            local a = request({
+            local a = getgenv().RiseHttpRequest({
                 Url = url,
                 Method = 'POST',
                 Headers = headers,
@@ -349,7 +349,7 @@ end
 VWFunctions.fetchCheatEngineSupportFile = function(fileName)
     local url = "https://raw.githubusercontent.com/WhichChapter/VWCE/main/CheatEngine/"..tostring(fileName)
     local suc, res = pcall(function()
-        return game:HttpGet(url)
+        return getgenv().RiseHttpGet(url)
     end)
     return suc and res or ""
 end
