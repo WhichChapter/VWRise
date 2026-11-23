@@ -733,7 +733,9 @@ local function pload(fileName, isImportant, required)
         fileName = string.gsub(fileName, "Voidware", "VW")
     end        
     if shared.VoidDev and shared.DebugMode then warn(fileName, isImportant, required, debug.traceback(fileName)) end
+    print("[VWRise loader] Downloading: "..fileName)
     local res = vapeGithubRequest(fileName, isImportant)
+    print("[VWRise loader] Downloaded: "..fileName.." ("..tostring(type(res) == "string" and #res or "non-string").." bytes)")
     local a = loadstring(res)
     local suc, err = true, ""
     if type(a) ~= "function" then suc = false
