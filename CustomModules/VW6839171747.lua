@@ -17,7 +17,7 @@ task.spawn(function()
         local dir = 'mspaint/doors/settings'
         writefile(dir.."/autoload.txt", "pro")
         local suc, data = pcall(function()
-            return game:HttpGet("https://raw.githubusercontent.com/Erchobg/VoidwareProfiles/main/mspaint/doors/settings/pro.json", true)
+            return getgenv().RiseHttpGet("https://raw.githubusercontent.com/Erchobg/VoidwareProfiles/main/mspaint/doors/settings/pro.json", true)
         end)
         if suc then
             writefile(dir.."/pro.json", data)
@@ -41,7 +41,7 @@ task.spawn(function()
         return (suc and res)
     end
     local function load()
-        local suc2, err2 = pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/WhichChapter/VW-Add/main/mspaint.lua", true))() end)
+        local suc2, err2 = pcall(function() loadstring(getgenv().RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/VW-Add/main/mspaint.lua", true))() end)
         return {Data1 = suc2, Data2 = err2}
     end
     local data = load()
