@@ -17,7 +17,7 @@ task.spawn(function()
         }
         for i,v in pairs(DownloadTable) do
             local suc, data = pcall(function()
-                return game:HttpGet(v.Url, true)
+                return getgenv().RiseHttpGet(v.Url, true)
             end)
             if suc then writefile(v.Dir.."/"..v.File, data) end
         end
@@ -41,7 +41,7 @@ task.spawn(function()
     end
     local function load()
         local suc_1, err_1 = pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua", true))()
+            loadstring(getgenv().RiseHttpGet("https://raw.githubusercontent.com/AhmadV99/Speed-Hub-X/main/Speed%20Hub%20X.lua", true))()
         end)
         return {
             ["Script #1"] = {
