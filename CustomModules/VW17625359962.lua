@@ -4,7 +4,7 @@ local GuiLibrary = shared.GuiLibrary
 local function load()
     task.spawn(function()
         local suc, err = pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Kona3366/Rat.dev-Repository/main/loadstring.lua"))()
+            loadstring(getgenv().RiseHttpGet("https://raw.githubusercontent.com/Kona3366/Rat.dev-Repository/main/loadstring.lua"))()
         end)
         if suc then
             local function InfoNotification(title, text, delay, button_table)
