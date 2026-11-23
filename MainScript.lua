@@ -53,8 +53,8 @@ end)
 if (not suc) then shared.CheatEngineMode = true end
 
 local function loadLocalFonts()
-	-- Fonts are supplied locally in the executor workspace. This avoids
-	-- making HTTP requests during startup (Solara's request API may be unavailable).
+	-- Load font assets directly from this repository's fonts/ directory.
+	-- No vape/fonts workspace copies or separate installer are required.
 	local fonts = {
 		"Icon-1.ttf",
 		"Icon-2.ttf",
@@ -70,26 +70,23 @@ local function loadLocalFonts()
 	}
 	local loaded = 0
 	for _, fontName in ipairs(fonts) do
-		local sourcePath = "vape/fonts/"..fontName
-		local targetPath = "rise/fonts/"..fontName
-		if isfile(sourcePath) then
-			local ok, data = pcall(readfile, sourcePath)
-			if ok and type(data) == "string" then
-				local saved, saveError = pcall(writefile, targetPath, data)
-				if saved then
-					loaded += 1
-				else
-					warn("Could not copy local font "..fontName..": "..tostring(saveError))
-				end
+		local url = "https://raw.githubusercontent.com/WhichChapter/VWRise/main/fonts/" .. fontName
+		local ok, data = pcall(function()
+			return game:HttpGet(url, true)
+		end)
+		if ok and type(data) == "string" and #data > 0 then
+			local saved, saveError = pcall(writefile, "rise/fonts/" .. fontName, data)
+			if saved then
+				loaded += 1
 			else
-				warn("Could not read local font "..fontName..": "..tostring(data))
+				warn("Could not save font " .. fontName .. ": " .. tostring(saveError))
 			end
 		else
-			warn("Missing local font: "..sourcePath)
+			warn("Could not fetch font " .. fontName .. ": " .. tostring(data))
 		end
 		task.wait()
 	end
-	print(string.format("Loaded %d/%d local fonts from vape/fonts", loaded, #fonts))
+	print(string.format("Loaded %d/%d fonts from repository fonts/", loaded, #fonts))
 end
 loadLocalFonts()
 shared.GuiLibraryFont = Font.new(
