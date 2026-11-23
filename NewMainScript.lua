@@ -1,6 +1,6 @@
 -- NewMainScript can also be launched from a cached file, so initialise
 -- the executor HTTP helper here instead of assuming MainScript ran first.
-shared.RiseHttpGet = shared.RiseHttpGet or function(url)
+shared.RiseHttpGet = function(url)
     assert(type(http) == "table" and type(http.request) == "function",
         "Solara http.request is unavailable; check your Solara version")
     local response = http.request({Url = url, Method = "GET"})
