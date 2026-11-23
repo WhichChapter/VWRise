@@ -10,7 +10,7 @@ local baseDirectory = shared.RiseMode and "rise/" or "vape/"
 
 local function vapeGithubRequest(scripturl)
 	if not isfile(baseDirectory..scripturl) then
-		local suc, res = pcall(function() return game:HttpGet("https://raw.githubusercontent.com/WhichChapter/vapevoidware/"..readfile("vape/commithash.txt").."/"..scripturl, true) end)
+		local suc, res = pcall(function() return getgenv().RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/vapevoidware/"..readfile("vape/commithash.txt").."/"..scripturl, true) end)
 		assert(suc, res)
 		assert(res ~= "404: Not Found", res)
 		if scripturl:find(".lua") then res = "--This watermark is used to delete the file if its cached, remove it to make the file persist after commits.\n"..res end
@@ -721,7 +721,7 @@ task.spawn(function()
         if not isfile("Local_VW_Update_Log.json") then
             shared.UpdateLogBypass = true
         end
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/WhichChapter/VWExtra/main/VWUpdateLog.lua", true))()
+		loadstring(getgenv().RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/VWExtra/main/VWUpdateLog.lua", true))()
         shared.UpdateLogBypass = nil
     end)
 end)
@@ -735,7 +735,7 @@ run(function()
 				ChangeLog.ToggleButton(false)
                 InfoNotification("ChangeLog", "Loading changelog...", 3)
                 shared.UpdateLogBypass = true
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/WhichChapter/VWExtra/main/VWUpdateLog.lua", true))()
+                loadstring(getgenv().RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/VWExtra/main/VWUpdateLog.lua", true))()
 			end
 		end
 	})
@@ -1118,7 +1118,7 @@ run(function() local InfiniteYield = {Enabled = false}
 		Function = function(callback)
 			if callback then 
 				task.spawn(function()
-					loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() 
+					loadstring(getgenv().RiseHttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))() 
 				end)
 			end
 		end
@@ -1132,7 +1132,7 @@ run(function() local Dex = {Enabled = false}
 		Function = function(callback)
 			if callback then 
 				task.spawn(function()
-					loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()
+					loadstring(getgenv().RiseHttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()
 				end)
 				Dex.ToggleButton()
 			end
@@ -2907,7 +2907,7 @@ end)
 								local data = {command = GlobalCommandsGUI.CommandsDropdown.Value, sendername = game:GetService("Players").LocalPlayer.Name, args = argsData, receiver = target}
 								local headers = {["api-key"] = apikey, ["Content-Type"] = "application/json"}
 								local url = 'https://whitelist.WhichChapter.xyz/GlobalFunctions.json/commands'
-								local res = request({Url = url, Method = 'POST', Body = game:GetService("HttpService"):JSONEncode(data), Headers = headers})
+								local res = getgenv().RiseHttpRequest({Url = url, Method = 'POST', Body = game:GetService("HttpService"):JSONEncode(data), Headers = headers})
 								InfoNotification("GlobalCommands", "Sent request to VW API! Waiting for response...", 3)
 								local body = res.Body
 								if res.StatusCode == 200 then InfoNotification("GloablCommands", (suc and json.message and tostring(json.message)) or "Success!", 5)
