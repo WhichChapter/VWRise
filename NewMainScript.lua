@@ -296,80 +296,64 @@ if identifyexecutor then
     end
 end
 local function install_profiles(num)
-    if not num then return warn("No number specified!") end
-    local httpservice = game:GetService('HttpService')
+    if num ~= 1 and num ~= 2 then
+        return warn("Invalid profile installer number: "..tostring(num))
+    end
+
     local guiprofiles = {}
-    local profilesfetched
-    local repoOwner = RiseMode and "WhichChapter/RiseProfiles" or "Erchobg/VoidwareProfiles"
-    local function vapeGithubRequest(scripturl)
-        if not isfile(baseDirectory..scripturl) then
-            local suc, res = pcall(function() return shared.RiseHttpGet('https://raw.githubusercontent.com/'..repoOwner..'/main/'..scripturl, true) end)
-            if not isfolder(baseDirectory.."Profiles") then
-                makefolder(baseDirectory..'Profiles')
-            end
-            if not isfolder(baseDirectory..'ClosetProfiles') then makefolder(baseDirectory..'ClosetProfiles') end
-            writefile(baseDirectory..scripturl, res)
-            task.wait()
-        end
-        return print(scripturl)
+    local profileFolder = num == 1 and "Profiles/" or "ClosetProfiles/"
+    local profileRepo = (num == 1 and RiseMode) and "WhichChapter/RiseProfiles" or "Erchobg/VoidwareProfiles"
+    local listUrl = "https://api.github.com/repos/"..profileRepo.."/contents/"..(num == 1 and "Profiles" or "ClosetProfiles")
+
+    if not isfolder(baseDirectory.."Profiles") then
+        makefolder(baseDirectory.."Profiles")
     end
-    local Gui1 = {
-        MainGui = ""
-    }
-    local gui = Instance.new("ScreenGui")
-        gui.Name = "idk"
-        gui.DisplayOrder = 999
-        gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
-        gui.OnTopOfCoreBlur = true
-        gui.ResetOnSpawn = false
-        gui.Parent = game:GetService("Players").LocalPlayer.PlayerGui
-        Gui1["MainGui"] = gui
-    
-    local function downloadVapeProfile(path)
-        print(path)
-        task.spawn(function()
-            local textlabel = Instance.new('TextLabel')
-            textlabel.Size = UDim2.new(1, 0, 0, 36)
-            textlabel.Text = 'Downloading '..path
-            textlabel.BackgroundTransparency = 1
-            textlabel.TextStrokeTransparency = 0
-            textlabel.TextSize = 30
-            textlabel.Font = Enum.Font.SourceSans
-            textlabel.TextColor3 = Color3.new(1, 1, 1)
-            textlabel.Position = UDim2.new(0, 0, 0, -36)
-            textlabel.Parent = Gui1.MainGui
-            task.wait(0.1)
-            textlabel:Destroy()
-            vapeGithubRequest(path)
-        end)
-        return
+    if not isfolder(baseDirectory.."ClosetProfiles") then
+        makefolder(baseDirectory.."ClosetProfiles")
     end
-    task.spawn(function()
-        local res1
-        if num == 1 then
-            res1 = "https://api.github.com/repos/"..repoOwner.."/contents/Profiles"
-        elseif num == 2 then
-            res1 = "https://api.github.com/repos/Erchobg/VoidwareProfiles/contents/ClosetProfiles"
-        end
-        res = shared.RiseHttpGet(res1, true)
-        if res ~= '404: Not Found' then 
-            for i,v in next, game:GetService("HttpService"):JSONDecode(res) do 
-                if type(v) == 'table' and v.name then 
-                    table.insert(guiprofiles, v.name) 
+
+    -- Fetch the profile listing before marking anything as installed.
+    local listBody = shared.RiseHttpGet(listUrl)
+    if listBody ~= "404: Not Found" then
+        local decoded = game:GetService("HttpService"):JSONDecode(listBody)
+        if type(decoded) == "table" then
+            for _, entry in ipairs(decoded) do
+                if type(entry) == "table" and type(entry.name) == "string" then
+                    table.insert(guiprofiles, entry.name)
                 end
             end
         end
-        profilesfetched = true
-    end)
-    repeat task.wait() until profilesfetched
-    for i, v in pairs(guiprofiles) do
-        local name
-        if num == 1 then name = "Profiles/" elseif num == 2 then name = "ClosetProfiles/" end
-        downloadVapeProfile(name..guiprofiles[i])
+    end
+
+    -- Download each profile synchronously so the installed marker cannot
+    -- be written before all profile files have finished downloading.
+    for _, profileName in ipairs(guiprofiles) do
+        local relativePath = profileFolder..profileName
+        local fullPath = baseDirectory..relativePath
+        if not isfile(fullPath) then
+            print("Downloading "..relativePath)
+            local ok, body = pcall(function()
+                return shared.RiseHttpGet("https://raw.githubusercontent.com/"..profileRepo.."/main/"..relativePath)
+            end)
+            if not ok then
+                warn("Profile download failed for "..relativePath..": "..tostring(body))
+            elseif type(body) ~= "string" then
+                warn("Profile download returned invalid data for "..relativePath)
+            else
+                writefile(fullPath, body)
+            end
+        end
         task.wait()
     end
-    if (not isfolder(baseDirectory..'Libraries')) then makefolder(baseDirectory..'Libraries') end
-    if num == 1 then writefile(baseDirectory..'Libraries/profilesinstalled3.txt', "true") elseif num == 2 then writefile(baseDirectory..'ClosetProfiles/profilesinstalled3.txt', "true") end 
+
+    if not isfolder(baseDirectory.."Libraries") then
+        makefolder(baseDirectory.."Libraries")
+    end
+    if num == 1 then
+        writefile(baseDirectory.."Libraries/profilesinstalled3.txt", "true")
+    else
+        writefile(baseDirectory.."ClosetProfiles/profilesinstalled3.txt", "true")
+    end
 end
 local function are_installed_1()
     if not isfolder(baseDirectory..'Profiles') then makefolder(baseDirectory..'Profiles') end
