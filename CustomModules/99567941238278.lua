@@ -1,3 +1,3 @@
 -- Ink Game: Lobby
 repeat task.wait() until game:IsLoaded()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/WhichChapter/VW-Add/main/inkgame.lua", true))()
+loadstring(getgenv().RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/VW-Add/main/inkgame.lua", true))()
