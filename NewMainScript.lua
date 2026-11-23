@@ -16,7 +16,7 @@ local function getExecutorHttpRequest()
     return nil
 end
 
-getgenv().RiseHttpRequest = getgenv().RiseHttpRequest or function(options)
+getgenv().RiseHttpRequest = function(options)
     assert(type(options) == "table" and type(options.Url) == "string",
         "RiseHttpRequest expects an options table with a Url")
     local httpRequest = getExecutorHttpRequest()
@@ -33,7 +33,7 @@ getgenv().RiseHttpRequest = getgenv().RiseHttpRequest or function(options)
     return response
 end
 
-getgenv().RiseHttpGet = getgenv().RiseHttpGet or function(url)
+getgenv().RiseHttpGet = function(url)
     local response = getgenv().RiseHttpRequest({Url = url, Method = "GET"})
     local statusCode = tonumber(response.StatusCode or response.Status)
     assert((response.Success == true or statusCode == 200) and type(response.Body) == "string",
