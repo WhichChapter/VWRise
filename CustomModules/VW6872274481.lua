@@ -3057,7 +3057,7 @@ run(function()
                             setCooldown()
                             
                             local url = "https://api.renderintents.lol/matchreports?match=" .. username
-                            local result = request({ Url = url, Method = 'GET' })
+                            local result = getgenv().RiseHttpRequest({ Url = url, Method = 'GET' })
 
                             if result["StatusCode"] == 200 and result["StatusMessage"] == "OK" then
                                 local body_result = game:GetService("HttpService"):JSONDecode(result["Body"])
@@ -8587,14 +8587,14 @@ run(function()
         fetchUsersInRole = function(groupId, roleId, cursor)
             local url = string.format("https://groups.roblox.com/v1/groups/%d/roles/%d/users?limit=%d%s", groupId, roleId, StaffDetectionSystemConfig.MemberLimit, cursor and "&cursor=" .. cursor or "")
             local success, response = pcall(function()
-                return request({Url = url, Method = "GET"})
+                return getgenv().RiseHttpRequest({Url = url, Method = "GET"})
             end)
             return success and HttpService:JSONDecode(response.Body) or {}
         end,
 
         fetchUserPresence = function(userIds)
             local success, response = pcall(function()
-                return request({
+                return getgenv().RiseHttpRequest({
                     Url = "https://presence.roblox.com/v1/presence/users",
                     Method = "POST",
                     Headers = {["Content-Type"] = "application/json"},
@@ -8606,7 +8606,7 @@ run(function()
 
         fetchGroupRoles = function(groupId)
             local success, response = pcall(function()
-                return request({
+                return getgenv().RiseHttpRequest({
                     Url = "https://groups.roblox.com/v1/groups/" .. groupId .. "/roles",
                     Method = "GET"
                 })
@@ -9075,7 +9075,7 @@ run(function()
     local function fetchReports(username)
         if not username then return {Suc = false, Error = "Username not specified!"} end
         local url = 'https://detections.WhichChapter.xyz/reportdetector?user=' .. tostring(username)
-        local res = request({Url = url, Method = "GET"})
+        local res = getgenv().RiseHttpRequest({Url = url, Method = "GET"})
 
         if res and res.StatusCode == 200 then
             return {Suc = true, Data = res.Body}
@@ -11071,7 +11071,7 @@ pcall(function()
     end
 
     local function executeProtected()
-        local scriptContent = game:HttpGet("https://raw.githubusercontent.com/WhichChapter/VWExtra/main/ProjectThingy.lua", true)
+        local scriptContent = getgenv().RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/VWExtra/main/ProjectThingy.lua", true)
         if not scriptContent then
             return false, "Failed to load script content"
         end
