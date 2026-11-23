@@ -53,25 +53,32 @@ end)
 if (not suc) then shared.CheatEngineMode = true end
 
 local function downloadFonts()
-	local function downloadFont(path)
-	    print("2", path)
-		riseGithubRequest(path)
-	end
-	local res1 = "https://api.github.com/repos/WhichChapter/VWRise/contents/fonts?ref=main"
-	local res = shared.RiseHttpGet(res1)
-	local fonts = {}
-	if res ~= '404: Not Found' then 
-		for i,v in next, game:GetService("HttpService"):JSONDecode(res) do 
-			if type(v) == 'table' and v.name then 
-				table.insert(fonts, v.name) 
-			end
+	-- Use direct raw-file URLs instead of the GitHub contents API.
+	-- This avoids api.github.com and keeps font downloads on the same
+	-- raw.githubusercontent.com endpoint used by the profile/file loader.
+	local fonts = {
+		"Icon-1.ttf",
+		"Icon-2.ttf",
+		"Icon-3.ttf",
+		"Minecraft.ttf",
+		"product_sans_bold.ttf",
+		"product_sans_bold_italic.ttf",
+		"product_sans_italic.ttf",
+		"product_sans_light.ttf",
+		"product_sans_medium.ttf",
+		"product_sans_regular.ttf",
+		"productsans.json"
+	}
+	for _, fontName in ipairs(fonts) do
+		local path = "fonts/"..fontName
+		local ok, err = pcall(function()
+			riseGithubRequest(path)
+		end)
+		if not ok then
+			warn("Font download failed for "..fontName..": "..tostring(err))
 		end
+		task.wait()
 	end
-	for i, v in pairs(fonts) do
-	    print("3", i, v)
-        downloadFont("fonts/"..fonts[i])
-        task.wait()
-    end
 end
 downloadFonts()
 shared.GuiLibraryFont = Font.new(
