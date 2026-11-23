@@ -9,7 +9,7 @@ task.spawn(function()
     warningNotification("Voidware - Bedwarz", "Warning! Some or all modules are currently patched :( sorry", 10)
 end) --- eee sk1dded#0 moment
 -- Initialize Orion Library
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()  -- Ensure you have the correct URL for OrionLib
+local OrionLib = loadstring(getgenv().RiseHttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()  -- Ensure you have the correct URL for OrionLib
 
 -- Create the window
 local Window = OrionLib:MakeWindow({
@@ -475,7 +475,7 @@ MiscTab:AddToggle({
 MiscTab:AddButton({
     Name = "ESP",
     Callback = function()
-        loadstring(game:HttpGet("https://pastebin.com/raw/iv9qAHZP"))()
+        loadstring(getgenv().RiseHttpGet("https://pastebin.com/raw/iv9qAHZP"))()
     end
 })
 
@@ -493,7 +493,7 @@ UniversalTab:AddLabel("Universal Scripts")
 UniversalTab:AddButton({
     Name = "Load Inf Yield",
     Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Inf-yeild-New-Version-1836"))()
+        loadstring(getgenv().RiseHttpGet("https://rawscripts.net/raw/Universal-Script-Inf-yeild-New-Version-1836"))()
     end
 })
 
@@ -501,7 +501,7 @@ UniversalTab:AddButton({
 UniversalTab:AddButton({
     Name = "Load Nameless Admin",
     Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Nameless-Admin-Official-15022"))()
+        loadstring(getgenv().RiseHttpGet("https://rawscripts.net/raw/Universal-Script-Nameless-Admin-Official-15022"))()
     end
 })
 
@@ -509,7 +509,7 @@ UniversalTab:AddButton({
 UniversalTab:AddButton({
     Name = "Load Remote Spy",
     Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Just-A-Script-Rewrite-12363"))()
+        loadstring(getgenv().RiseHttpGet("https://rawscripts.net/raw/Universal-Script-Just-A-Script-Rewrite-12363"))()
     end
 })
 
@@ -517,7 +517,7 @@ UniversalTab:AddButton({
 UniversalTab:AddButton({
     Name = "Load Fly Mobile",
     Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-FLY-GUI-V3-8031"))()
+        loadstring(getgenv().RiseHttpGet("https://rawscripts.net/raw/Universal-Script-FLY-GUI-V3-8031"))()
     end
 })
 
