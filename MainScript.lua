@@ -17,7 +17,7 @@ assert(not shared.RiseExecuted, "Rise Already Injected")
 shared.RiseExecuted = true
 shared.VapeExecuted = true
 
-for i,v in pairs({"rise", "rise/CustomModules", "rise/Profiles", "rise/Assets", "rise/Libraries", "rise/fonts"}) do if not isfolder(v) then makefolder(v) end end
+for i,v in pairs({"rise", "rise/CustomModules", "rise/Profiles", "rise/Assets", "rise/Libraries", "rise/fonts", "vape", "vape/fonts"}) do if not isfolder(v) then makefolder(v) end end
 
 -- Prefer Solara's documented http.request API. Some compatibility aliases
 -- route through Roblox HttpGet, which is restricted in this executor thread.
@@ -52,10 +52,9 @@ local suc, err = pcall(function()
 end)
 if (not suc) then shared.CheatEngineMode = true end
 
-local function downloadFonts()
-	-- Use direct raw-file URLs instead of the GitHub contents API.
-	-- This avoids api.github.com and keeps font downloads on the same
-	-- raw.githubusercontent.com endpoint used by the profile/file loader.
+local function loadLocalFonts()
+	-- Fonts are supplied locally in the executor workspace. This avoids
+	-- making HTTP requests during startup (Solara's request API may be unavailable).
 	local fonts = {
 		"Icon-1.ttf",
 		"Icon-2.ttf",
@@ -69,18 +68,30 @@ local function downloadFonts()
 		"product_sans_regular.ttf",
 		"productsans.json"
 	}
+	local loaded = 0
 	for _, fontName in ipairs(fonts) do
-		local path = "fonts/"..fontName
-		local ok, err = pcall(function()
-			riseGithubRequest(path)
-		end)
-		if not ok then
-			warn("Font download failed for "..fontName..": "..tostring(err))
+		local sourcePath = "vape/fonts/"..fontName
+		local targetPath = "rise/fonts/"..fontName
+		if isfile(sourcePath) then
+			local ok, data = pcall(readfile, sourcePath)
+			if ok and type(data) == "string" then
+				local saved, saveError = pcall(writefile, targetPath, data)
+				if saved then
+					loaded += 1
+				else
+					warn("Could not copy local font "..fontName..": "..tostring(saveError))
+				end
+			else
+				warn("Could not read local font "..fontName..": "..tostring(data))
+			end
+		else
+			warn("Missing local font: "..sourcePath)
 		end
 		task.wait()
 	end
+	print(string.format("Loaded %d/%d local fonts from vape/fonts", loaded, #fonts))
 end
-downloadFonts()
+loadLocalFonts()
 shared.GuiLibraryFont = Font.new(
     "rbxasset://fonts/families/GothamSSm.json", 
     Enum.FontWeight.Medium,
