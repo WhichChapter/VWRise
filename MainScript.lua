@@ -17,7 +17,7 @@ assert(not shared.RiseExecuted, "Rise Already Injected")
 shared.RiseExecuted = true
 shared.VapeExecuted = true
 
-for i,v in pairs({"rise", "rise/CustomModules", "rise/Profiles", "rise/Assets", "rise/Libraries", "rise/fonts", "vape", "vape/fonts"}) do if not isfolder(v) then makefolder(v) end end
+for i,v in pairs({"rise", "rise/CustomModules", "rise/Profiles", "rise/Assets", "rise/Libraries", "rise/fonts", "vape"}) do if not isfolder(v) then makefolder(v) end end
 
 -- Prefer Solara's documented http.request API. Some compatibility aliases
 -- route through Roblox HttpGet, which is restricted in this executor thread.
@@ -40,58 +40,11 @@ shared.RiseHttpGet = function(url)
 	return response.Body
 end
 
-local function riseGithubRequest(scripturl)
-	print("1", scripturl)
-	local res = shared.RiseHttpGet("https://raw.githubusercontent.com/WhichChapter/VWRise/main/" .. scripturl)
-	writefile("rise/" .. scripturl, res)
-	return res
-end
-
 local suc, err = pcall(function()
 	return getrenv().require(game:GetService("CoreGui").RobloxGui.Modules.ErrorPrompt)
 end)
 if (not suc) then shared.CheatEngineMode = true end
 
-local function loadLocalFonts()
-	-- Executor workspace paths are relative: vape/fonts/ means
-	-- <executor workspace>/vape/fonts/. Read only these local files.
-	local fonts = {
-		"Icon-1.ttf",
-		"Icon-2.ttf",
-		"Icon-3.ttf",
-		"Minecraft.ttf",
-		"product_sans_bold.ttf",
-		"product_sans_bold_italic.ttf",
-		"product_sans_italic.ttf",
-		"product_sans_light.ttf",
-		"product_sans_medium.ttf",
-		"product_sans_regular.ttf",
-		"productsans.json"
-	}
-	local loaded = 0
-	for _, fontName in ipairs(fonts) do
-		local sourcePath = "vape/fonts/" .. fontName
-		local targetPath = "rise/fonts/" .. fontName
-		local readOk, data = pcall(function()
-			return readfile(sourcePath)
-		end)
-		if readOk and type(data) == "string" and #data > 0 then
-			local writeOk, writeError = pcall(function()
-				writefile(targetPath, data)
-			end)
-			if writeOk then
-				loaded += 1
-			else
-				warn("Could not copy " .. sourcePath .. ": " .. tostring(writeError))
-			end
-		else
-			warn("Could not read " .. sourcePath .. ": " .. tostring(data))
-		end
-		task.wait()
-	end
-	print(string.format("Loaded %d/%d fonts from workspace/vape/fonts", loaded, #fonts))
-end
-loadLocalFonts()
 shared.GuiLibraryFont = Font.new(
     "rbxasset://fonts/families/GothamSSm.json", 
     Enum.FontWeight.Medium,
