@@ -592,10 +592,8 @@ task.spawn(function()
     end)
 end)
 local url = RiseMode and "https://github.com/WhichChapter/VWRise/" or "https://github.com/WhichChapter/VoidwareBakup"
-local commit = "main"
+local commit = shared.CustomCommit and tostring(shared.CustomCommit) or "main"
 writefile(baseDirectory.."commithash2.txt", commit)
-commit = 'af8595bfff2cc8935ddd502d828342c7025e8e2a'
-commit = shared.CustomCommit and tostring(shared.CustomCommit) or commit
 shared.VOIDWARE_SCRIPT_TYPE = "BEDWARS_RISE"
 writefile(baseDirectory.."commithash2.txt", commit)
 pcall(function()
